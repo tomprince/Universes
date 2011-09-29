@@ -97,9 +97,10 @@ typer :: Context -> Term -> Maybe Term
 typer ctx v@(Free _) = liftM getType $ fromCtx ctx v
 typer ctx v@(Var _)  = liftM getType $ fromCtx ctx v
 typer ctx (Lambda v t) = do t' <- typer ctx v
+                            v' <- eval ctx v
                             guard =<< isKind `liftM` eval ctx t'
-                            t <- typer (lift ctx v) t
-                            return $ Forall t v
+                            t <- typer (lift ctx v') t
+                            return $ Forall v t
 typer ctx (Forall v t) = do v <- typer ctx v
                             let ctx' = lift ctx v
                             t' <- typer ctx' t
