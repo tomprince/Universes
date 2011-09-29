@@ -5,6 +5,7 @@ import Data.Maybe
 import Data.Tuple
 
 import Base
+import Parser
 
 data S
   = Prop
@@ -116,13 +117,11 @@ addToContext ctx (name, L t) = typer ctx t >>= \t' -> return  ((name, LetBind t 
 buildContext :: Sort s => [(String, Ctx s)] -> Context s
 buildContext = foldl (\ctx -> fromMaybe ctx . addToContext ctx) ([],[])
 
-context :: Context S'
-context = buildContext [ ("Prop", L (Sort$Type'))
-                       , ("Power", L (Lambda (Sort$Type') (Forall (Var 0) (Free "Prop"))))
-                       , ("False", L (Forall (Free "Prop") (Var 0)))
-                       , ("Not", L (Lambda (Sort$Type') (Forall (Var 0) (Free "False"))))
-                       , ("U", L (Forall (Sort$Type') (Forall (Forall (p $ p $ Var 0) (Var 1)) (p $ p $ Var 1))))
-                       ]
-  where p x = (Apply (Free "Power") x)
-                                    
-                                                      
+context :: Sort s => Context s
+context = buildContext [ ("Prop", l "%0"), ("Type", l "%1")
+                        , ("Power", l "\\P: Type, P -> Prop")
+                        , ("False", l "forall P: Prop, P")
+                        , ("Not", l "\\P : Prop, P -> False")
+                        , ("U", l "forall (T: Type) (_: Power (Power T) -> T), Power (Power T)")
+                        ]
+          where l = L . parsed
