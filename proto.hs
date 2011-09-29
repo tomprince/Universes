@@ -34,7 +34,7 @@ instance Sort S' where
 
 maybeT :: (a -> Maybe a) -> a -> a
 maybeT f a = fromMaybe a (f a)
-    
+
 getLetValue :: Binding s -> Maybe (Term s)
 getLetValue (LetBind c _) = Just c
 getLetValue _ = Nothing
@@ -77,7 +77,7 @@ eval ctx (Apply f v) = do f <- eval ctx f
                                 Lambda _ t -> eval (liftL ctx v) t
                                 _ -> return $ Apply f v
 eval ctx s@(Sort _) = return s
-                 
+
 simpl :: Context s -> Term s -> Term s
 simpl ctx = maybeT ((getLetValue =<<) . fromCtx ctx)
 
