@@ -1,22 +1,15 @@
-{-# LANGUAGE DeriveDataTypeable, GADTs, Rank2Types #-}
-
-import Data.Generics.Zipper
-import Data.Generics
-import Data.Map(Map)
-import qualified Data.Map as Map
-import Data.Sequence(Seq,(|>))
-import qualified Data.Sequence as Seq
+import Control.Arrow
 import Control.Monad
+import Data.Function
 import Data.Maybe
 import Data.Tuple
-import Data.Function
 
 import Base
 
 data S
   = Prop
   | Type Int
-    deriving (Eq, Show, Typeable, Data)
+    deriving (Eq, Show)
 
 instance Sort S where
     triple Prop Prop = Type 0
@@ -31,7 +24,7 @@ instance Sort S where
            | otherwise = Prop
 
 data S' = Type'
-    deriving (Eq, Show, Typeable, Data)
+    deriving (Eq, Show)
 
 instance Sort S' where
     triple Type' Type' = Type'
