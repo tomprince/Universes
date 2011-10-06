@@ -9,7 +9,7 @@ import Control.Monad.Reader
 import Control.Monad.State
 import qualified Text.Parsec.Token as P
 
-lexer :: P.GenTokenParser String () (Reader [String])
+lexer :: P.GenTokenParser String () (Reader r)
 lexer = P.makeTokenParser P.LanguageDef
            { P.commentStart = "{-"
            , P.commentEnd = "-}"
@@ -29,13 +29,13 @@ reserved = P.reserved lexer
 op = P.reservedOp lexer
 nat = P.natural lexer
 
-type DBContext = [String]
+type DBContext = [Maybe String]
 
-extend :: String -> DBContext -> DBContext
+extend :: Maybe String -> DBContext -> DBContext
 extend = (:)
 
 find :: DBContext -> String -> Term s
-find ctx id = maybe (Free id) Var (elemIndex id ctx)
+find ctx id = maybe (Free id) Var (elemIndex (Just id) ctx)
 
 type Parser t = ParsecT String () (Reader DBContext) t
 
@@ -46,10 +46,10 @@ boundVar = find <$> ask <*> ident
 sortP :: Parser (Term Int)
 sortP = Sort . fromInteger <$ op "%" <*> nat
 
-type Binder = (String, Term Int)
+type Binder = (Maybe String, Term Int)
 
-boundName :: Parser String
-boundName = ident <|> op "_" *> return "_"
+boundName :: Parser (Maybe String)
+boundName = (Just <$> ident) <|> (op "_" *> return Nothing)
 
 openBinder :: Parser [Binder]
 openBinder = zip <$> some boundName <*> (repeat <$ op ":" <*> parseTerm)
@@ -67,17 +67,17 @@ binders = openBinder <|> closedBinders
 extendP :: Parser t -> [Binder] -> Parser ([Binder], t)
 extendP p bind = (,) bind <$> local (foldl (flip extend) $ map fst bind) p
 
-applyBinders b = flip $ foldr (b . snd)
+applyBinders b = flip $ foldr (uncurry b)
 
-abstraction :: Parser () -> (Term Int -> Term Int -> Term Int) -> Parser (Term Int)
+abstraction :: Parser () -> (Maybe String -> Term Int -> Term Int -> Term Int) -> Parser (Term Int)
 abstraction header binder = header >> uncurry (applyBinders binder) <$> (binders >>= extendP (op "," *> parseTerm))
 
 application :: Parser (Term Int)
 application = do t <- parseSimple
-                 (optional (op "$") *> parseTerm >>= \s -> return $ Apply t s) <|> (op"->" *> local (extend "_") parseTerm >>= \s -> return $ Forall t s) <|>  return t
+                 (optional (op "$") *> parseTerm >>= \s -> return $ Apply t s) <|> (op"->" *> local (extend Nothing) parseTerm >>= \s -> return $ Forall Nothing t s) <|>  return t
 
 func :: Parser (Term Int)
-func = Forall <$> parseSimple <* op"->" <*> local (extend "_") parseTerm
+func = Forall Nothing <$> parseSimple <* op"->" <*> local (extend Nothing) parseTerm
 
 parseSimple :: Parser (Term Int)
 parseSimple =     parens parseTerm
