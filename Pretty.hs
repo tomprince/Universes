@@ -1,13 +1,13 @@
+{-# OPTIONS -fwarn-unused-imports #-}
 module Pretty () where
 
 import Base
 
+import Control.Applicative
+import Control.Arrow
 import Control.Monad.Reader
 import Data.List
 import Data.Maybe
-import Control.Applicative
-import Control.Arrow
-import Control.Monad
 
 type DBContext = [String]
 

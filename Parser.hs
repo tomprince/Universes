@@ -1,12 +1,13 @@
+{-# OPTIONS -fwarn-unused-imports #-}
 module Parser (runParser, parse, parsed, parser) where
+
 import Base
-import Text.Parsec hiding ((<|>), many, optional, parse, runParser)
-import Data.List(elemIndex)
-import Control.Monad
 import Control.Applicative
 import Control.Arrow
+import Control.Monad
 import Control.Monad.Reader
-import Control.Monad.State
+import Data.List(elemIndex)
+import Text.Parsec hiding ((<|>), many, optional, parse, runParser)
 import qualified Text.Parsec.Token as P
 
 lexer :: P.GenTokenParser String () (Reader r)

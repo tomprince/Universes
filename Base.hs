@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveFunctor, StandaloneDeriving, FlexibleContexts, UndecidableInstances #-}
+{-# OPTIONS -fwarn-unused-imports #-}
 module Base (Sort(..), Term(..), Binding(..), Context(..), emptyContext, fromIntSort, toIntSort, dbShift) where
 
 import Data.Function(on)

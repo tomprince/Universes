@@ -1,8 +1,8 @@
+{-# OPTIONS -fwarn-unused-imports #-}
 import Control.Arrow
 import Control.Monad
 import Data.Function
 import Data.Maybe
-import Data.Tuple
 
 import Base
 import Parser
